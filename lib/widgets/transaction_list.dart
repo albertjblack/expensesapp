@@ -1,53 +1,64 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import 'package:intl/intl.dart';
-import '../constants/constants.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> userTransactions;
-  TransactionList(this.userTransactions);
+  final Function deleteTransaction;
+  TransactionList(this.userTransactions, this.deleteTransaction);
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: Container(
-      height: 205,
-      child: ListView.builder(
-        itemCount: userTransactions.length,
-        itemBuilder: (ctx, index) {
-          return Card(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(padding: EdgeInsets.fromLTRB(0, 30, 0, 30)),
+      height: 250,
+      child: userTransactions.isEmpty
+          ? Column(children: [
+              Text('No transactions yet.',
+                  style: Theme.of(context).textTheme.headline6),
               Container(
-                  padding: EdgeInsets.all(5),
-                  child: Text(
-                      "A: \$${userTransactions[index].amount!.toStringAsFixed(2)}",
-                      style: TextStyle(
-                          color: Color(mainColor),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18)),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Color(mainColor), width: 2)),
-                  margin: EdgeInsets.only(right: 10)),
-              Container(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                      child: Text((userTransactions[index].title).toString(),
-                          style: TextStyle(fontWeight: FontWeight.bold))),
-                  Container(
-                      child: Text(DateFormat('yyyy-MM-dd')
-                          .format(userTransactions[index].date!)))
-                ],
-              ))
-            ],
-          ));
-        },
-      ),
+                  height: 100,
+                  child: Image.asset(
+                    'assets/images/ordinary/waiting.png',
+                    fit: BoxFit.cover,
+                  ))
+            ])
+          : ListView.builder(
+              itemCount: userTransactions.length,
+              itemBuilder: (ctx, index) {
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+                  elevation: 3,
+                  child: ListTile(
+                      leading: Container(
+                        margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                        child: CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            child: Container(
+                              child: Padding(
+                                padding: EdgeInsets.all(10),
+                                child: FittedBox(
+                                    child: Text(
+                                  "\$${userTransactions[index].amount}",
+                                  textAlign: TextAlign.start,
+                                )),
+                              ),
+                            )),
+                      ),
+                      title: Text("${userTransactions[index].title}",
+                          style: Theme.of(context).textTheme.headline6),
+                      subtitle: Text(
+                          '${DateFormat.yMMMd().format(userTransactions[index].date!)}'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () =>
+                            deleteTransaction(userTransactions[index].id),
+                        color: Theme.of(context).errorColor,
+                      )),
+                );
+              },
+            ),
       width: double.infinity,
-    ));
+    );
   }
 }
