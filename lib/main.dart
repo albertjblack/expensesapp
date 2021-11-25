@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import './widgets/new_transaction.dart';
 import './widgets/transaction_list.dart';
@@ -39,7 +40,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> userTransactions = [];
-
+  var _switchChoice = false;
   void _addNewTransaction(
       String txnTitle, double txnAmount, DateTime chosenDate) {
     final newTxn = Transaction(
@@ -82,20 +83,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final appBar = AppBar(
+      actions: <Widget>[
+        IconButton(
+          onPressed: () => startAddNewTransaction(context),
+          icon: Icon(Icons.add),
+        )
+      ],
+      title: Image(
+        image: myLogoPng,
+        width: 64,
+      ),
+      backgroundColor: Theme.of(context).primaryColor,
+    );
+    final TxnList = Container(
+        height: (MediaQuery.of(context).size.height -
+                appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top) *
+            0.75,
+        child: TransactionList(userTransactions, _deleteTransaction));
     return Scaffold(
-        appBar: AppBar(
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => startAddNewTransaction(context),
-              icon: Icon(Icons.add),
-            )
-          ],
-          title: Image(
-            image: myLogoPng,
-            width: 64,
-          ),
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
+        appBar: appBar,
         body: SingleChildScrollView(
           child: Column(
               // column and rows have main axis (vert and hori) and cross axis
@@ -106,21 +116,57 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        // assumes the size of the child, unless you have it wrapped in a parent
-                        // text takes only the space needed for the word
-                        // to change the size of text we need to change the size of the parent Container()
-                        child: Chart(recentTransactions),
-                        //color: Theme.of(context).primaryColor,
-                      ),
+                      if (!isLandscape)
+                        Container(
+                          // assumes the size of the child, unless you have it wrapped in a parent
+                          // text takes only the space needed for the word
+                          // to change the size of text we need to change the size of the parent Container()
+                          child: Container(
+                              height: (MediaQuery.of(context).size.height -
+                                      appBar.preferredSize.height -
+                                      MediaQuery.of(context).padding.top) *
+                                  0.2,
+                              child: Chart(recentTransactions)),
+                          //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
+                        ),
+                      if (!isLandscape) TxnList,
+                      if (isLandscape)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Chart'),
+                            Switch(
+                                value: _switchChoice,
+                                onChanged: (val) {
+                                  setState(() {
+                                    _switchChoice = val;
+                                  });
+                                },
+                                activeColor: Color(mainColor))
+                          ],
+                        ),
+                      if (isLandscape)
+                        _switchChoice
+                            ? Container(
+                                // assumes the size of the child, unless you have it wrapped in a parent
+                                // text takes only the space needed for the word
+                                // to change the size of text we need to change the size of the parent Container()
+                                child: Container(
+                                    height:
+                                        (MediaQuery.of(context).size.height -
+                                                appBar.preferredSize.height -
+                                                MediaQuery.of(context)
+                                                    .padding
+                                                    .top) *
+                                            0.7,
+                                    child: Chart(recentTransactions)),
+                                //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
+                              )
+                            : TxnList,
                     ],
                   ),
                   width: double.maxFinite,
                 ),
-                TransactionList(userTransactions, _deleteTransaction)
               ]),
         ),
         floatingActionButton: FloatingActionButton(

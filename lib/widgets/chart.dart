@@ -39,30 +39,37 @@ class Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-        elevation: 5,
-        margin: EdgeInsets.all(10),
-        child: Container(
-          padding: EdgeInsets.all(10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ...groupedTransactionValues.map((data) {
-                // wrapped with flexible widget to make sure size does not change
-                return Flexible(
-                  fit: FlexFit
-                      .tight, // force size to use maximum space and will be the same for all
-                  child: ChartBar(
-                      data['day'].toString(),
-                      double.parse(data['amount'].toString()),
-                      totalSpending == 0
-                          ? 0
-                          : (double.parse(data['amount'].toString()) /
-                              totalSpending)),
-                );
-              }).toList(),
-            ],
-          ),
-        ));
+    return LayoutBuilder(
+      builder: (ctx, constraints) {
+        return Container(
+          height: constraints.maxHeight,
+          child: Card(
+              elevation: 5,
+              margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: Container(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ...groupedTransactionValues.map((data) {
+                      // wrapped with flexible widget to make sure size does not change
+                      return Flexible(
+                        fit: FlexFit
+                            .tight, // force size to use maximum space and will be the same for all
+                        child: ChartBar(
+                            data['day'].toString(),
+                            double.parse(data['amount'].toString()),
+                            totalSpending == 0
+                                ? 0
+                                : (double.parse(data['amount'].toString()) /
+                                    totalSpending)),
+                      );
+                    }).toList(),
+                  ],
+                ),
+              )),
+        );
+      },
+    );
   }
 }
