@@ -131,10 +131,12 @@ class _NewTransactionState extends State<NewTransaction> {
                   ),
                 ),
                 Platform.isIOS
-                    ? CupertinoButton(
-                        child: Text('Add transaction'),
-                        onPressed: submitData,
-                        color: Theme.of(context).primaryColor)
+                    ? SizedBox(
+                        child: CupertinoButton(
+                            child: Text('Add'),
+                            onPressed: submitData,
+                            color: Theme.of(context).primaryColor),
+                      )
                     : ElevatedButton(
                         child: Text('Add transaction'),
                         style: TextButton.styleFrom(
