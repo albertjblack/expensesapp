@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import './widgets/new_transaction.dart';
@@ -85,94 +88,122 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
-    final appBar = AppBar(
-      actions: <Widget>[
-        IconButton(
-          onPressed: () => startAddNewTransaction(context),
-          icon: Icon(Icons.add),
-        )
-      ],
-      title: Image(
-        image: myLogoPng,
-        width: 64,
-      ),
-      backgroundColor: Theme.of(context).primaryColor,
-    );
+    final PreferredSizeWidget appBar = (Platform.isIOS
+        ? CupertinoNavigationBar(
+            backgroundColor: Theme.of(context).primaryColor,
+            middle: Image(
+              image: myLogoPng,
+              width: 64,
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                    onTap: () => startAddNewTransaction(context),
+                    child: Icon(
+                      CupertinoIcons.add,
+                      color: Colors.white,
+                    ))
+              ],
+            ),
+          )
+        : AppBar(
+            actions: <Widget>[
+              IconButton(
+                onPressed: () => startAddNewTransaction(context),
+                icon: Icon(Icons.add),
+              )
+            ],
+            title: Image(
+              image: myLogoPng,
+              width: 64,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+          )) as PreferredSizeWidget;
+
     final TxnList = Container(
         height: (MediaQuery.of(context).size.height -
                 appBar.preferredSize.height -
                 MediaQuery.of(context).padding.top) *
             0.75,
         child: TransactionList(userTransactions, _deleteTransaction));
-    return Scaffold(
-        appBar: appBar,
-        body: SingleChildScrollView(
-          child: Column(
-              // column and rows have main axis (vert and hori) and cross axis
-              // these axis position the content where you want it to be inside the col or row
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  child: Column(
-                    children: [
-                      if (!isLandscape)
-                        Container(
-                          // assumes the size of the child, unless you have it wrapped in a parent
-                          // text takes only the space needed for the word
-                          // to change the size of text we need to change the size of the parent Container()
-                          child: Container(
-                              height: (MediaQuery.of(context).size.height -
-                                      appBar.preferredSize.height -
-                                      MediaQuery.of(context).padding.top) *
-                                  0.2,
-                              child: Chart(recentTransactions)),
-                          //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
-                        ),
-                      if (!isLandscape) TxnList,
-                      if (isLandscape)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Chart'),
-                            Switch(
-                                value: _switchChoice,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _switchChoice = val;
-                                  });
-                                },
-                                activeColor: Color(mainColor))
-                          ],
-                        ),
-                      if (isLandscape)
-                        _switchChoice
-                            ? Container(
-                                // assumes the size of the child, unless you have it wrapped in a parent
-                                // text takes only the space needed for the word
-                                // to change the size of text we need to change the size of the parent Container()
-                                child: Container(
-                                    height:
-                                        (MediaQuery.of(context).size.height -
-                                                appBar.preferredSize.height -
-                                                MediaQuery.of(context)
-                                                    .padding
-                                                    .top) *
-                                            0.7,
-                                    child: Chart(recentTransactions)),
-                                //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
-                              )
-                            : TxnList,
-                    ],
-                  ),
-                  width: double.maxFinite,
-                ),
-              ]),
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () => startAddNewTransaction(context),
-            backgroundColor: Theme.of(context).secondaryHeaderColor),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat);
+    final appBody = SafeArea(
+        child: SingleChildScrollView(
+      child: Column(
+          // column and rows have main axis (vert and hori) and cross axis
+          // these axis position the content where you want it to be inside the col or row
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              child: Column(
+                children: [
+                  if (!isLandscape)
+                    Container(
+                      // assumes the size of the child, unless you have it wrapped in a parent
+                      // text takes only the space needed for the word
+                      // to change the size of text we need to change the size of the parent Container()
+                      child: Container(
+                          height: (MediaQuery.of(context).size.height -
+                                  appBar.preferredSize.height -
+                                  MediaQuery.of(context).padding.top) *
+                              0.2,
+                          child: Chart(recentTransactions)),
+                      //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
+                    ),
+                  if (!isLandscape) TxnList,
+                  if (isLandscape)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Chart',
+                            style: Theme.of(context).textTheme.headline6),
+                        Switch.adaptive(
+                            value: _switchChoice,
+                            onChanged: (val) {
+                              setState(() {
+                                _switchChoice = val;
+                              });
+                            },
+                            activeColor: Color(mainColor))
+                      ],
+                    ),
+                  if (isLandscape)
+                    _switchChoice
+                        ? Container(
+                            // assumes the size of the child, unless you have it wrapped in a parent
+                            // text takes only the space needed for the word
+                            // to change the size of text we need to change the size of the parent Container()
+                            child: Container(
+                                height: (MediaQuery.of(context).size.height -
+                                        appBar.preferredSize.height -
+                                        MediaQuery.of(context).padding.top) *
+                                    0.7,
+                                child: Chart(recentTransactions)),
+                            //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
+                          )
+                        : TxnList,
+                ],
+              ),
+              width: double.maxFinite,
+            ),
+          ]),
+    ));
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: appBody,
+            navigationBar: appBar as ObstructingPreferredSizeWidget,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: appBody,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () => startAddNewTransaction(context),
+                    backgroundColor: Theme.of(context).secondaryHeaderColor),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat);
   }
 }
