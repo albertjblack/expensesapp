@@ -76,6 +76,58 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Widget> _buildLPortraitContent(
+      appBar, MediaQueryData mediaQuery, Widget TxnList) {
+    return [
+      Container(
+        // assumes the size of the child, unless you have it wrapped in a parent
+        // text takes only the space needed for the word
+        // to change the size of text we need to change the size of the parent Container()
+        child: Container(
+            height: (mediaQuery.size.height -
+                    appBar.preferredSize.height -
+                    mediaQuery.padding.top) *
+                0.2,
+            child: Chart(recentTransactions)),
+        //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
+      ),
+      TxnList
+    ];
+  }
+
+  List<Widget> _buildLandscapeContent(appBar, Widget TxnList) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Chart', style: Theme.of(context).textTheme.headline6),
+          Switch.adaptive(
+              value: _switchChoice,
+              onChanged: (val) {
+                setState(() {
+                  _switchChoice = val;
+                });
+              },
+              activeColor: Color(mainColor))
+        ],
+      ),
+      _switchChoice
+          ? Container(
+              // assumes the size of the child, unless you have it wrapped in a parent
+              // text takes only the space needed for the word
+              // to change the size of text we need to change the size of the parent Container()
+              child: Container(
+                  height: (MediaQuery.of(context).size.height -
+                          appBar.preferredSize.height -
+                          MediaQuery.of(context).padding.top) *
+                      0.7,
+                  child: Chart(recentTransactions)),
+              //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
+            )
+          : TxnList
+    ];
+  }
+
   List<Transaction> get recentTransactions {
     // where returns an iterable just as map() so we use .tolist
     return userTransactions.where((txn) {
@@ -86,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData mediaQuery = MediaQuery.of(context);
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final PreferredSizeWidget appBar = (Platform.isIOS
@@ -139,50 +192,8 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 children: [
                   if (!isLandscape)
-                    Container(
-                      // assumes the size of the child, unless you have it wrapped in a parent
-                      // text takes only the space needed for the word
-                      // to change the size of text we need to change the size of the parent Container()
-                      child: Container(
-                          height: (MediaQuery.of(context).size.height -
-                                  appBar.preferredSize.height -
-                                  MediaQuery.of(context).padding.top) *
-                              0.2,
-                          child: Chart(recentTransactions)),
-                      //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
-                    ),
-                  if (!isLandscape) TxnList,
-                  if (isLandscape)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Chart',
-                            style: Theme.of(context).textTheme.headline6),
-                        Switch.adaptive(
-                            value: _switchChoice,
-                            onChanged: (val) {
-                              setState(() {
-                                _switchChoice = val;
-                              });
-                            },
-                            activeColor: Color(mainColor))
-                      ],
-                    ),
-                  if (isLandscape)
-                    _switchChoice
-                        ? Container(
-                            // assumes the size of the child, unless you have it wrapped in a parent
-                            // text takes only the space needed for the word
-                            // to change the size of text we need to change the size of the parent Container()
-                            child: Container(
-                                height: (MediaQuery.of(context).size.height -
-                                        appBar.preferredSize.height -
-                                        MediaQuery.of(context).padding.top) *
-                                    0.7,
-                                child: Chart(recentTransactions)),
-                            //color: Theme.of(context).primaryColor, ///// CHART CHART CHART
-                          )
-                        : TxnList,
+                    ..._buildLPortraitContent(appBar, mediaQuery, TxnList),
+                  if (isLandscape) ..._buildLandscapeContent(appBar, TxnList),
                 ],
               ),
               width: double.maxFinite,
