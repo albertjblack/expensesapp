@@ -41,9 +41,27 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final List<Transaction> userTransactions = [];
   var _switchChoice = false;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance!.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
+
   void _addNewTransaction(
       String txnTitle, double txnAmount, DateTime chosenDate) {
     final newTxn = Transaction(
@@ -74,6 +92,43 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       userTransactions.removeWhere((txn) => txn.id == id);
     });
+  }
+
+  Widget _buildCupertinoAppBar() {
+    return CupertinoNavigationBar(
+      backgroundColor: Theme.of(context).primaryColor,
+      middle: Image(
+        image: myLogoPng,
+        width: 64,
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+              onTap: () => startAddNewTransaction(context),
+              child: Icon(
+                CupertinoIcons.add,
+                color: Colors.white,
+              ))
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return AppBar(
+      actions: <Widget>[
+        IconButton(
+          onPressed: () => startAddNewTransaction(context),
+          icon: Icon(Icons.add),
+        )
+      ],
+      title: Image(
+        image: myLogoPng,
+        width: 64,
+      ),
+      backgroundColor: Theme.of(context).primaryColor,
+    );
   }
 
   List<Widget> _buildLPortraitContent(
@@ -142,37 +197,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final PreferredSizeWidget appBar = (Platform.isIOS
-        ? CupertinoNavigationBar(
-            backgroundColor: Theme.of(context).primaryColor,
-            middle: Image(
-              image: myLogoPng,
-              width: 64,
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                    onTap: () => startAddNewTransaction(context),
-                    child: Icon(
-                      CupertinoIcons.add,
-                      color: Colors.white,
-                    ))
-              ],
-            ),
-          )
-        : AppBar(
-            actions: <Widget>[
-              IconButton(
-                onPressed: () => startAddNewTransaction(context),
-                icon: Icon(Icons.add),
-              )
-            ],
-            title: Image(
-              image: myLogoPng,
-              width: 64,
-            ),
-            backgroundColor: Theme.of(context).primaryColor,
-          )) as PreferredSizeWidget;
+        ? _buildCupertinoAppBar() //
+        : _buildAppBar()) as PreferredSizeWidget;
 
     final TxnList = Container(
         height: (MediaQuery.of(context).size.height -
